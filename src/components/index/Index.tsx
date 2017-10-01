@@ -15,10 +15,16 @@ export class Index extends React.Component<{}, {}> {
     bancoRealtimeAPI.onError(err => console.log('Banco API Error', err));
     bancoRealtimeAPI.onCompletion(() => console.log('Banco API Complete'));
     bancoRealtimeAPI.onMessage(msg => console.log(msg));
-    bancoRealtimeAPI.login('rustykey4@naver.com','wlsgh82')
+    bancoRealtimeAPI.login('rustykey4@naver.com','wlsgh82').subscribe(msg => {
+      console.log('login');
+      console.log('msg', msg);
+    });
 
     //get rooms
-    bancoRealtimeAPI.callMethod('rooms/getAll')
+    bancoRealtimeAPI.callMethod('rooms/getAll').subscribe(msg => {
+      console.log('rooms/getAll');
+      console.log('msg', msg);
+    });
 
     //join room
     // bancoAPI.callMethod('joinRoom','BITCOIN')
