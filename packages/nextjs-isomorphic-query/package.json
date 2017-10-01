@@ -1,0 +1,27 @@
+{
+  "name": "nextjs-isomorphic-query",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/deptno/nextjs-isomorphic-query",
+  "author": "bglee <deptno@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc "
+  },
+  "devDependencies": {
+    "typescript": "^2.5.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "<rootDir>/preprocessor.js"
+    },
+    "testMatch": [
+      "**/*.(test|spec).(ts|tsx)"
+    ]
+  }
+}
