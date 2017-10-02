@@ -23,6 +23,7 @@ export const reducer: Reducer<connectionState> = (state = defaultState, action) 
     case actionTypes.CONNECTION_ESTABLISHED:
       state = {
         ...state,
+        loading    : false,
         isConnected: true,
         server     : action.payload.server
       }
@@ -30,6 +31,7 @@ export const reducer: Reducer<connectionState> = (state = defaultState, action) 
     case actionTypes.CLOSE_CONNECTION:
       state = {
         ...state,
+        loading    : false,
         isConnected: false,
       }
       return state
