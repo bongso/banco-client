@@ -1,0 +1,7 @@
+enum ActionTypes {
+  INIT_CONNECTION        = 'INIT_CONNECTION',
+  CONNECTION_ESTABLISHED = 'CONNECTION_ESTABLISHED',
+  CLOSE_CONNECTION       = 'CLOSE_CONNECTION'
+}
+
+export default ActionTypes

@@ -30,11 +30,13 @@
     "react-redux": "^5.0.5",
     "redux": "^3.7.1",
     "redux-fetch": "https://github.com/deptno/redux-fetch.git#refac/v2",
+    "redux-observable": "^0.16.0",
     "redux-persist": "^4.9.1",
     "redux-thunk": "^2.2.0",
     "rocket.chat.realtime.api.rxjs": "0.0.4",
     "rxjs": "^5.4.3",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "websocket": "^1.0.24"
   },
   "devDependencies": {
     "@types/jest": "^20.0.8",
