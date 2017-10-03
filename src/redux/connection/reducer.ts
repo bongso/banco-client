@@ -13,7 +13,7 @@ const defaultState = {
   server     : null
 } as connectionState
 
-export const reducer: Reducer<connectionState> = (state = defaultState, action) => {
+export const connection: Reducer<connectionState> = (state = defaultState, action) => {
   switch (action.type) {
     case actionTypes.INIT_CONNECTION:
       return {

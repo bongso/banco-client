@@ -86,6 +86,7 @@ class BancoRealtimeAPI {
    */
   public connectToServer() {
     this.sendMessage({'msg': 'connect', 'version': '1', 'support': ['1', 'pre2', 'pre1']})
+    // return this.getObservableFilteredByMessageType('connected')
     return this.getObservableFilteredByMessageType('connected')
   }
 

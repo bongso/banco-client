@@ -7,7 +7,7 @@ import {
   SITE_TITLE
 } from '../src/constants/env'
 
-export default class RSquareDocument extends Document {
+export default class BancoDocument extends Document {
   static async getInitialProps(...args) {
     const documentProps = await super.getInitialProps(...args)
     const {req, renderPage} = args[0]

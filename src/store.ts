@@ -5,39 +5,40 @@ import {DEV} from './constants/env'
 import thunk from 'redux-thunk'
 import {createLogger} from 'redux-logger'
 import {persistStore, autoRehydrate} from 'redux-persist'
-import { createEpicMiddleware, combineEpics } from 'redux-observable'
+import {createEpicMiddleware, combineEpics} from 'redux-observable'
 import {initializeNa} from './redux/log/index'
-import {session} from './redux/system/index'
 
-import { Observable } from 'rxjs'
+import {Observable} from 'rxjs'
 import {WebSocketSubject} from 'rxjs/observable/dom/WebSocketSubject'
 
 import * as ws from 'websocket'
 
-import {initConnection} from './redux/connection/epics'
+import {initConnection$} from './redux/connection/epics'
+import {initConnection} from './redux/connection/actions'
+
 import BancoRealtimeAPI from './lib/banco-realtime-api'
 
 const BANCO_URL: string = 'ws://localhost:3000/websocket'
 
-let socket = new WebSocketSubject({
-  url: BANCO_URL,
+const socket = new WebSocketSubject({
+  url          : BANCO_URL,
   WebSocketCtor: ws.w3cwebsocket
-});
+})
 
 let bancoRealtimeAPI = new BancoRealtimeAPI(socket)
 
 bancoRealtimeAPI.onError(err => console.log('Banco API Error', err))
 bancoRealtimeAPI.onCompletion(() => console.log('Banco API Complete'))
-bancoRealtimeAPI.onMessage(msg => console.log(msg))
-bancoRealtimeAPI.keepAlive();
+bancoRealtimeAPI.onMessage(msg => console.log('message',msg))
+bancoRealtimeAPI.keepAlive()
 
-const epics = combineEpics(initConnection)
+const epics = combineEpics(initConnection$)
 
 const epicMiddleware = createEpicMiddleware(epics, {
   dependencies: {
     bancoRealtimeAPI: bancoRealtimeAPI
   }
-});
+})
 
 let store
 
@@ -55,13 +56,14 @@ export const getStore = (state, isServer?): Store<RootState> => {
       const mw = [thunk, epicMiddleware]
       if (!DEV) {
         if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
-          window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function () {}
+          window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function () {
+          }
         }
       } else {
         mw.push(createLogger({
           predicate: (getState, action) => !/^@@/.test(action.type),
           collapsed: true
-        }));
+        }))
       }
 
       store = createStore<RootState>(
@@ -69,14 +71,17 @@ export const getStore = (state, isServer?): Store<RootState> => {
         state,
         composeEnhancers(applyMiddleware(...mw), autoRehydrate())
       )
-      store.dispatch(initializeNa());
+
+      store.dispatch(initializeNa())
 
       const whitelist = ['persist']
+
       persistStore(store, {whitelist}, _ => {
-        store.dispatch(session());
-        console.log(`define whitelist: ${whitelist.join(', ')}`)
+        // console.log(`define whitelist: ${whitelist.join(', ')}`)
+        store.dispatch(initConnection())
       })
     }
+
     return store
   }
 }

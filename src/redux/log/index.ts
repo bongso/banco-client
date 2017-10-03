@@ -15,8 +15,8 @@ const INITIALIZED_GA = 'INITIALIZED_GA'
 const INITIALIZED_NA = 'INITIALIZED_NA'
 const SKIP_GA = 'SKIP_GA'
 const SKIP_NA = 'SKIP_NA'
-const UPDATE_USER    = 'UPDATE_USER'
-const LOG_NA         = 'LOG_NA'
+const UPDATE_USER = 'UPDATE_USER'
+const LOG_NA = 'LOG_NA'
 
 export const initializeGa = (userId?) => {
   if (!DEV && GA_TRACKING_ID) {
@@ -37,7 +37,7 @@ export const initializeGa = (userId?) => {
   return {type: SKIP_GA}
 }
 
-export const logNa     = (first: string, second: string) => {
+export const logNa = (first: string, second: string) => {
   if (!DEV) {
     wcs_do({cnv: wcs.cnv(first, second)})
   }
