@@ -1,37 +1,73 @@
 .screen {
   display: flex;
-  height: 100vh;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-content: flex-start;
   align-items: stretch;
+  background-color: #f3f3f7;
+  width: 100vw;
+  height: 100vh;
 }
 
 .sidebar {
-  position: relative;
+  width: 180px;
+  color: #424245;
+  background-color: #f6f6f6;
+  border-right: 1px solid #cdcdcd;
+//border: 1px solid blue
+}
+
+.main {
+  flex: 1;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: column;
-  background-color: #2f343d;
-  width: 200px;
-  height: 100vh;
-  color: #fff;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: stretch;
+
+  background-color: #f3f3f7;
+//border: 1px solid red
+}
+
+.main-header {
+  height: 66px;
+  background-color: #f8f8f9;
+  border-bottom: 1px solid #d0d0d1;
 }
 
 .main-content {
-  position: relative;
-  display: flex;
   flex: 1;
-  background-color: #eee;
+  background-color: #f3f3f7;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: stretch;
+//border:1px solid green
 }
 
 .chart-content {
-  position: relative;
-  display: flex;
   flex: 1;
-  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid #cdcdcd;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: stretch;
 }
 
-.message-content {
-  position: relative;
-  display: flex;
-  background-color: #fff;
+.chat-content {
+  background-color: #ffffff;
   width: 400px;
-  height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: stretch;
 }
