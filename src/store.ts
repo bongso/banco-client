@@ -20,16 +20,11 @@ import BancoRealtimeAPI from './lib/banco-realtime-api'
 
 const BANCO_URL: string = 'ws://localhost:3000/websocket'
 
-const socket = new WebSocketSubject({
-  url          : BANCO_URL,
-  WebSocketCtor: ws.w3cwebsocket
-})
+let bancoRealtimeAPI = new BancoRealtimeAPI(BANCO_URL)
 
-let bancoRealtimeAPI = new BancoRealtimeAPI(socket)
-
-bancoRealtimeAPI.onError(err => console.log('Banco API Error', err))
+bancoRealtimeAPI.onError((err) => console.log('Banco API Error', err))
 bancoRealtimeAPI.onCompletion(() => console.log('Banco API Complete'))
-bancoRealtimeAPI.onMessage(msg => console.log('message',msg))
+bancoRealtimeAPI.onMessage((msg) => console.log('message',msg))
 bancoRealtimeAPI.keepAlive()
 
 const epics = combineEpics(initConnection$)
@@ -47,13 +42,13 @@ export const getStore = (state, isServer?): Store<RootState> => {
     return createStore<RootState>(
       reducer,
       state,
-      applyMiddleware(thunk, epicMiddleware)
+      applyMiddleware(thunk.withExtraArgument(bancoRealtimeAPI), epicMiddleware)
     )
   } else {
     const composeEnhancers = DEV && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
     if (!store) {
-      const mw = [thunk, epicMiddleware]
+      const mw = [thunk.withExtraArgument(bancoRealtimeAPI), epicMiddleware]
       if (!DEV) {
         if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
           window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function () {
