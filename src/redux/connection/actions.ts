@@ -13,6 +13,13 @@ export const connectionEstablished = (payload : any) => {
   }
 }
 
+export const connectionError = (payload : any) => {
+  return {
+    type: actionTypes.CONNECTION_ERROR,
+    payload: payload
+  }
+}
+
 export const closeConnection = () => {
   return {
     type: actionTypes.CLOSE_CONNECTION,

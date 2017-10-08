@@ -5,24 +5,32 @@ import {Observable} from 'rxjs'
 import {WebSocketSubject} from 'rxjs/observable/dom/WebSocketSubject'
 import {v1 as uuid} from 'uuid'
 import {SHA256} from 'crypto-js'
+import * as ws from 'websocket'
 
 class BancoRealtimeAPI {
   public url: string
   public webSocket: WebSocketSubject<{}>
+  public isKeepAlive: boolean
 
-  constructor(param: string | WebSocketSubject<{}>) {
+  constructor(param: string) {
     switch (typeof param) {
       case 'string':
-        this.url       = param as string
-        this.webSocket = Observable.webSocket(this.url)
-        break
-      case 'object':
-        this.webSocket = param as WebSocketSubject<{}>
-        this.url       = this.webSocket.url
+        this.url = param as string
+        this.webSocket = this.createWebSocket(this.url)
+        this.isKeepAlive = false
         break
       default:
         throw new Error(`param error with "${typeof param}"`)
     }
+  }
+
+  public createWebSocket(url: string) {
+    const socket = new WebSocketSubject({
+      url          : url,
+      WebSocketCtor: ws.w3cwebsocket
+    })
+
+    return socket
   }
 
   /**
@@ -86,7 +94,6 @@ class BancoRealtimeAPI {
    */
   public connectToServer() {
     this.sendMessage({'msg': 'connect', 'version': '1', 'support': ['1', 'pre2', 'pre1']})
-    // return this.getObservableFilteredByMessageType('connected')
     return this.getObservableFilteredByMessageType('connected')
   }
 
@@ -94,26 +101,36 @@ class BancoRealtimeAPI {
    * keepAlive, Ping and Pong to the Rocket.Chat Server to Keep the Connection Alive.
    */
   public keepAlive(): void {
+    this.isKeepAlive = true
     this.getObservableFilteredByMessageType('ping').subscribe(
-      message => this.sendMessage({msg: 'pong'})
+      message => {
+        if (this.isKeepAlive) {
+          this.sendMessage({msg: 'pong'})
+        }
+      }
     )
+  }
+
+  public disconnect(): void {
+    this.isKeepAlive = false
+    this.webSocket.unsubscribe()
   }
 
   /**
    * Login with Username and Password
    */
   public login(username: string, password: string) {
-    let id           = uuid()
+    let id = uuid()
     let usernameType = username.indexOf('@') !== -1 ? 'email' : 'username'
     this.sendMessage({
-      'msg':    'method',
+      'msg'   : 'method',
       'method': 'login',
-      'id':     id,
+      'id'    : id,
       'params': [
         {
-          'user':     {[usernameType]: username},
+          'user'    : {[usernameType]: username},
           'password': {
-            'digest':    SHA256(password).toString(),
+            'digest'   : SHA256(password).toString(),
             'algorithm': 'sha-256'
           }
         }
@@ -128,9 +145,9 @@ class BancoRealtimeAPI {
   public loginWithAuthToken(authToken: string) {
     let id = uuid()
     this.sendMessage({
-      'msg':    'method',
+      'msg'   : 'method',
       'method': 'login',
-      'id':     id,
+      'id'    : id,
       'params': [
         {'resume': authToken}
       ]
@@ -144,13 +161,13 @@ class BancoRealtimeAPI {
   public loginWithOAuth(credToken: string, credSecret: string) {
     let id = uuid()
     this.sendMessage({
-      'msg':    'method',
+      'msg'   : 'method',
       'method': 'login',
-      'id':     id,
+      'id'    : id,
       'params': [
         {
           'oauth': {
-            'credentialToken':  credToken,
+            'credentialToken' : credToken,
             'credentialSecret': credSecret
           }
         }
@@ -181,12 +198,14 @@ class BancoRealtimeAPI {
    */
   public callMethod(method: string, ...params: Array<{}>) {
     let id = uuid()
+
     this.sendMessage({
       'msg': 'method',
-      method,
       id,
+      method,
       params
     })
+
     return this.getObservableFilteredByID(id)
   }
 
@@ -194,12 +213,25 @@ class BancoRealtimeAPI {
    * getSubscription
    */
   public getSubscription(streamName: string, streamParam: string, addEvent: boolean) {
-    let id           = uuid()
+    let id = uuid()
+
+    // this.sendMessage({
+    //   'msg'   : 'sub',
+    //   'id'    : id,
+    //   'name'  : streamName,
+    //   'params': [
+    //     streamParam,
+    //     addEvent
+    //   ]
+    // })
+    //
+    // return this.getObservableFilteredByID(id)
+
     let subscription = this.webSocket.multiplex(
       () => JSON.stringify({
-        'msg':    'sub',
-        'id':     id,
-        'name':   streamName,
+        'msg'   : 'sub',
+        'id'    : id,
+        'name'  : streamName,
         'params': [
           streamParam,
           addEvent
@@ -207,12 +239,25 @@ class BancoRealtimeAPI {
       }),
       () => JSON.stringify({
         'msg': 'unsub',
-        'id':  id
+        'id' : id
       }),
-      (message: any) => typeof message.collection === 'string' && message.collection === streamName && message.fields.eventName === streamParam // Proper Filtering to be done. This is temporary filter just for the stream-room-messages subscription
+      (message: any) => {
+        return typeof message.collection === 'string' && message.collection === streamName && message.fields.eventName === streamParam
+      }
+      // Proper Filtering to be done. This is temporary filter just for the stream-room-messages subscription
     )
+
     return subscription
   }
+
+  /**
+   * get Stream room messages
+   * @param roomId
+   */
+  public getStreamRoomMessages(roomId: string) {
+    return this.getSubscription('stream-room-messages', roomId, false)
+  }
+
 }
 
 export default BancoRealtimeAPI

@@ -1,19 +1,21 @@
 import actionTypes from './actionTypes'
 import {Reducer} from 'redux'
 
-export interface connectionState {
+export interface ConnectionState {
   loading: boolean,
   isConnected: boolean,
-  server: any
+  session: string | null,
+  error: any
 }
 
-const defaultState = {
+const defaultConnectionState = {
   loading    : false,
   isConnected: false,
-  server     : null
-} as connectionState
+  session   : null,
+  error      : null
+} as ConnectionState
 
-export const connection: Reducer<connectionState> = (state = defaultState, action) => {
+export const connection: Reducer<ConnectionState> = (state = defaultConnectionState, action) => {
   switch (action.type) {
     case actionTypes.INIT_CONNECTION:
       return {
@@ -21,20 +23,26 @@ export const connection: Reducer<connectionState> = (state = defaultState, actio
         loading: true
       }
     case actionTypes.CONNECTION_ESTABLISHED:
-      state = {
+      return {
         ...state,
         loading    : false,
         isConnected: true,
-        server     : action.payload.server
+        session   : action.payload.session
       }
-      return state
     case actionTypes.CLOSE_CONNECTION:
-      state = {
+      return {
         ...state,
         loading    : false,
         isConnected: false,
       }
-      return state
+    case actionTypes.CONNECTION_ERROR:
+      return {
+        ...state,
+        loading    : false,
+        isConnected: false,
+        server     : null,
+        error      : action.payload.error
+      }
     default:
       return state
   }
