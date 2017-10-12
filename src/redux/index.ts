@@ -3,16 +3,28 @@ import {PersistState, reducer as persist} from './persist/index'
 import {reducer as router, replaceUrl} from './router/index'
 import {ConnectionState, connection} from './connection/reducer'
 import {ChatsStates, chats} from './chats/reducer'
+import {RoomsState, rooms} from './room/rooms/reducer'
+import {CreatingPrivateRoomState, creatingPrivateRoom} from './room/creatingPrivateRoom/reducer'
+import {LeavingRoomState, leavingRoom} from './room/leavingRoom/reducer'
+import {OpeningRoomState, openingRoom} from './room/openingRoom/reducer'
 
 export interface RootState {
   persist: PersistState
   connection: ConnectionState,
-  chats: ChatsStates
+  chats: ChatsStates,
+  rooms: RoomsState,
+  creatingPrivateRoom: CreatingPrivateRoomState,
+  leavingRoom: LeavingRoomState,
+  openingRoom: OpeningRoomState,
 }
 
 export const reducer = combineReducers<RootState>({
   persist,
   router,
   connection,
-  chats
+  chats,
+  rooms,
+  creatingPrivateRoom,
+  leavingRoom,
+  openingRoom
 })

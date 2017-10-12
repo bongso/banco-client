@@ -250,8 +250,18 @@ class BancoRealtimeAPI {
     return subscription
   }
 
+  public unsubscribe(subscriptionId: string | null) {
+    this.sendMessage({
+      'msg': 'unsub',
+      'id' : subscriptionId
+    })
+
+    return this.getObservableFilteredByID(subscriptionId)
+  }
+
   /**
    * get Stream room messages
+   * @param streamId
    * @param roomId
    */
   public getStreamRoomMessages(roomId: string) {

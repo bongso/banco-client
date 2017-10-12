@@ -4,9 +4,10 @@ import {connect} from 'react-redux'
 import {RootState} from '../../redux/index'
 import stylesheet from './Chat.pcss'
 import {bindActionCreators} from 'redux'
-import {loadRoomHistory} from '../../redux/chats/actions'
+import {loadRoomHistory, subscribeRoomMessages, unsubscribeRoomMessages} from '../../redux/chats/actions'
 import {ChatsStates} from '../../redux/chats/reducer'
 import {Message} from '../message/Message'
+import {v1 as uuid} from 'uuid'
 
 //Interface for Component's props
 interface OwnProps {
@@ -31,13 +32,17 @@ const mapStateToProps = (state: RootState) => {
 
 //Interface for Redux's dispatch to component's props
 interface MapDispatchToProps {
-  loadRoomHistory
+  loadRoomHistory,
+  subscribeRoomMessages,
+  unsubscribeRoomMessages
 }
 
 //Redux's dispatch to component's props
 const mapDispatchToProps = (dispatch): MapDispatchToProps => {
   const actionCreators = {
-    loadRoomHistory
+    loadRoomHistory,
+    subscribeRoomMessages,
+    unsubscribeRoomMessages
   }
 
   return bindActionCreators(actionCreators, dispatch)
@@ -52,16 +57,42 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       roomId: React.PropTypes.string
     }
 
+    public streamRoomMessageInstance: any
+
+    constructor(props) {
+      super(props)
+    }
 
     componentWillMount() {
-      const roomId: string = this.props.roomId
-      console.log('Chat roomId', roomId)
-      this.props.loadRoomHistory(roomId)
+      this.initRoomMessaage()
+    }
+
+    componentWillUnmount() {
+      this.unsubscribeRoomMessages()
+    }
+
+    //load history of this room and subscribe this room
+    initRoomMessaage() {
+      const {roomId, loadRoomHistory, subscribeRoomMessages} = this.props
+
+      loadRoomHistory(roomId).then(() => {
+        this.streamRoomMessageInstance = subscribeRoomMessages(roomId)
+      })
+    }
+
+    //unsubscribe this room
+    unsubscribeRoomMessages() {
+      const {roomId, unsubscribeRoomMessages} = this.props
+      const streamRoomMessageInstance = this.streamRoomMessageInstance
+
+      if (streamRoomMessageInstance) {
+        unsubscribeRoomMessages(streamRoomMessageInstance, roomId)
+      }
     }
 
     _renderMessages() {
-      const roomId: string = this.props.roomId
-      const chat = this.props.chats[roomId]
+      const {roomId, chats} = this.props
+      const chat = chats[roomId]
       const messages = chat && chat.messages
 
       if (messages && messages.length > 0) {
@@ -69,8 +100,11 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
           <div className={classnames('chat')}>
             {
               messages.map((message, index) => {
+                const prevMessage = index > 0 ? messages[index - 1] : null
+                const nextMessage = index < messages.length - 1 ? messages[index + 1] : null
+
                 return (
-                  <Message key={index} message={message}/>
+                  <Message key={index} prevMessage={prevMessage} message={message}/>
                 )
               })
             }

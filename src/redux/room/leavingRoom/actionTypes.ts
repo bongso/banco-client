@@ -1,0 +1,7 @@
+enum ActionTypes {
+  LEAVE_ROOM_STARTED = 'LEAVE_ROOM_STARTED',
+  LEAVE_ROOM_SUCCEED = 'LEAVE_ROOM_SUCCEED',
+  LEAVE_ROOM_FAILED  = 'LEAVE_ROOM_FAILED'
+}
+
+export default ActionTypes

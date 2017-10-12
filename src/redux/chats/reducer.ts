@@ -35,10 +35,10 @@ export interface ChatState {
 }
 
 const defaultChatState = {
-  roomId  : null,
-  messages: [],
-  loading : false,
-  error   : null
+  roomId        : null,
+  messages      : [],
+  loading       : false,
+  error         : null
 } as ChatState
 
 export interface ChatsStates extends Array<ChatState> {
@@ -69,6 +69,34 @@ export const chats: Reducer<ChatsStates> = (state = defaultChatsStates, action) 
         ...state[action.payload.roomId],
         loading: false,
         error  : action.payload.error
+      }
+
+      return Object.assign({}, state)
+
+    case actionTypes.SUBSCRIBE_ROOM_SUCCEED:
+      state[action.payload.roomId] = {
+        ...state[action.payload.roomId],
+      }
+
+      return Object.assign({}, state)
+    case actionTypes.UNSUBSCRIBE_ROOM_SUCCEED:
+      state[action.payload.roomId] = {
+        ...state[action.payload.roomId],
+      }
+
+      return Object.assign({}, state)
+    case actionTypes.SAVE_ROOM_MESSAGES_SUCCEED:
+      state[action.payload.roomId] = {
+        ...state[action.payload.roomId],
+        roomId  : action.payload.roomId,
+        messages: [...action.payload.messages, ...state[action.payload.roomId].messages],
+      }
+
+      return Object.assign({}, state)
+    case actionTypes.SAVE_ROOM_MESSAGES_FAILED:
+      state[action.payload.roomId] = {
+        ...state[action.payload.roomId],
+        error: action.payload.error
       }
 
       return Object.assign({}, state)

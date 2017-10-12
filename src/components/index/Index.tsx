@@ -6,7 +6,9 @@ import stylesheet from './Index.pcss'
 import {ConnectionState} from '../../redux/connection/reducer'
 import {bindActionCreators} from 'redux'
 import {initConnection} from '../../redux/connection/actions'
+import {OpeningRoomState} from '../../redux/room/openingRoom/reducer'
 import {Chat} from '../chat/Chat'
+import {Rooms} from '../rooms/Rooms'
 
 //Interface for Component's props
 interface OwnProps {
@@ -18,13 +20,15 @@ interface OwnState {
 
 //Interface for Redux's state to component's props
 interface MapStateToProps {
-  connection: ConnectionState
+  connection: ConnectionState,
+  openingRoom: OpeningRoomState
 }
 
 //Redux's state to component's props
 const mapStateToProps = (state: RootState) => {
   return {
-    connection: state.connection
+    connection : state.connection,
+    openingRoom: state.openingRoom
   }
 }
 
@@ -48,12 +52,22 @@ export const Index = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
 )(
   class Index extends React.Component<MapStateToProps & MapDispatchToProps & OwnProps, OwnState> {
 
+    _renderChat() {
+      const {openingRoom} = this.props
+      if (openingRoom.room && openingRoom.room._id) {
+        return <Chat roomId={openingRoom.room._id}/>
+      }
+
+      return null
+    }
+
     _renderScreen() {
+
       return (
         <div className={classnames('screen')}>
           <style>{stylesheet}</style>
           <aside className={classnames('sidebar')}>
-            side-menu
+            <Rooms/>
           </aside>
           <div className={classnames('main')}>
             <div className={classnames('main-header')}>
@@ -64,7 +78,9 @@ export const Index = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
                 chart content here
               </div>
               <div className={classnames('chat-content')}>
-                <Chat roomId={'GENERAL'}/>
+                {
+                  this._renderChat()
+                }
               </div>
             </div>
           </div>

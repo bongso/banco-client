@@ -1,0 +1,7 @@
+enum ActionTypes {
+  OPEN_ROOM_STARTED = 'OPEN_ROOM_STARTED',
+  OPEN_ROOM_SUCCEED = 'OPEN_ROOM_SUCCEED',
+  OPEN_ROOM_FAILED  = 'OPEN_ROOM_FAILED'
+}
+
+export default ActionTypes

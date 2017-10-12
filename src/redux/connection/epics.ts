@@ -21,7 +21,7 @@ export const initConnection$ = (action$, store, {bancoRealtimeAPI}) => {
 
       // const now = {'$date': new Date().getTime()}
       //
-      // bancoRealtimeAPI.callMethod('rooms/get', now)
+      bancoRealtimeAPI.callMethod('rooms/getAll')
       // bancoRealtimeAPI.login('rustykey4@naver.com', 'wlsgh82')
       // bancoRealtimeAPI.callMethod('loadHistory', 'GENERAL', null, 50, now)
       //
