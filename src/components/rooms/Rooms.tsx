@@ -7,9 +7,11 @@ import {bindActionCreators} from 'redux'
 import {getRooms} from '../../redux/room/rooms/actions'
 import {openRoom} from '../../redux/room/openingRoom/actions'
 import {RoomsState, RoomState} from '../../redux/room/rooms/reducer'
+import Link from 'next/link'
 
 //Interface for Component's props
 interface OwnProps {
+  selectedRoomName: string
 }
 
 //Interface for Component's state
@@ -53,32 +55,44 @@ export const Rooms = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       super(props)
     }
 
-    componentWillReceiveProps(newProps) {
-    }
-
     componentWillMount() {
       this.initRooms()
     }
 
-    //load history of this room and subscribe this room
-    initRooms() {
-      const {getRooms} = this.props
-      getRooms()
+    componentWillReceiveProps(newProps: MapStateToProps & MapDispatchToProps & OwnProps) {
+      // console.log('Rooms componentWillReceiveProps this.props', this.props)
+      // console.log('Rooms componentWillReceiveProps newProps', newProps)
+
+      if (this.props.selectedRoomName != newProps.selectedRoomName) {
+        if (newProps.selectedRoomName && this.getRoomByName(newProps.selectedRoomName)) {
+          this.props.openRoom(this.getRoomByName(newProps.selectedRoomName))
+        }
+      }
     }
 
-    onOpenRoomClick(room: RoomState) {
-      console.log(room)
-      const {openRoom} = this.props
-      openRoom(room)
+    //load history of this room and subscribe this room
+    initRooms() {
+      const {getRooms, openRoom, selectedRoomName} = this.props
+      getRooms().then(() => {
+        if (selectedRoomName && this.getRoomByName(selectedRoomName)) {
+          openRoom(this.getRoomByName(selectedRoomName))
+        }
+      })
+    }
+
+    getRoomByName(roomName: string) {
+      return this.props.rooms.totalRooms.find((x) => x.name == roomName)
     }
 
     _renderRoom(room: RoomState, index: number) {
+      const url = '/channel?channelName=' + room.name
+      const isSelected = room.name == this.props.selectedRoomName
       return (
-        <a key={index} className={classnames('room')} onClick={() => {
-          this.onOpenRoomClick(room)
-        }}>
-          # {room.name}
-        </a>
+        <Link href={url} key={index}>
+          <a className={classnames('room', isSelected ? 'selected' : null)}>
+            # {room.name}
+          </a>
+        </Link>
       )
     }
 

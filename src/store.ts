@@ -5,16 +5,7 @@ import {DEV} from './constants/env'
 import thunk from 'redux-thunk'
 import {createLogger} from 'redux-logger'
 import {persistStore, autoRehydrate} from 'redux-persist'
-import {createEpicMiddleware, combineEpics} from 'redux-observable'
 import {initializeNa} from './redux/log/index'
-
-import {Observable} from 'rxjs'
-import {WebSocketSubject} from 'rxjs/observable/dom/WebSocketSubject'
-
-import * as ws from 'websocket'
-
-import {initConnection$} from './redux/connection/epics'
-import {initConnection} from './redux/connection/actions'
 
 import BancoRealtimeAPI from './lib/banco-realtime-api'
 
@@ -27,14 +18,6 @@ bancoRealtimeAPI.onCompletion(() => console.log('Banco API Complete'))
 bancoRealtimeAPI.onMessage((msg) => console.log('message',msg))
 bancoRealtimeAPI.keepAlive()
 
-const epics = combineEpics(initConnection$)
-
-const epicMiddleware = createEpicMiddleware(epics, {
-  dependencies: {
-    bancoRealtimeAPI: bancoRealtimeAPI
-  }
-})
-
 let store
 
 export const getStore = (state, isServer?): Store<RootState> => {
@@ -42,13 +25,13 @@ export const getStore = (state, isServer?): Store<RootState> => {
     return createStore<RootState>(
       reducer,
       state,
-      applyMiddleware(thunk.withExtraArgument(bancoRealtimeAPI), epicMiddleware)
+      applyMiddleware(thunk.withExtraArgument(bancoRealtimeAPI))
     )
   } else {
     const composeEnhancers = DEV && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
     if (!store) {
-      const mw = [thunk.withExtraArgument(bancoRealtimeAPI), epicMiddleware]
+      const mw = [thunk.withExtraArgument(bancoRealtimeAPI)]
       if (!DEV) {
         if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
           window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function () {
@@ -73,7 +56,8 @@ export const getStore = (state, isServer?): Store<RootState> => {
 
       persistStore(store, {whitelist}, _ => {
         // console.log(`define whitelist: ${whitelist.join(', ')}`)
-        store.dispatch(initConnection())
+        // store.dispatch(initConnection())
+        
       })
     }
 

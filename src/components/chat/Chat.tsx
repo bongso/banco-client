@@ -6,12 +6,13 @@ import stylesheet from './Chat.pcss'
 import {bindActionCreators} from 'redux'
 import {loadRoomHistory, subscribeRoomMessages, unsubscribeRoomMessages} from '../../redux/chats/actions'
 import {ChatsStates} from '../../redux/chats/reducer'
+import {OpeningRoomState} from '../../redux/room/openingRoom/reducer'
+import {RoomState} from '../../redux/room/rooms/reducer'
 import {Message} from '../message/Message'
 import {v1 as uuid} from 'uuid'
-
+import * as _ from 'lodash'
 //Interface for Component's props
 interface OwnProps {
-  roomId: string
 }
 
 //Interface for Component's state
@@ -20,13 +21,15 @@ interface OwnState {
 
 //Interface for Redux's state to component's props
 interface MapStateToProps {
-  chats: ChatsStates
+  chats: ChatsStates,
+  openingRoom: OpeningRoomState
 }
 
 //Redux's state to component's props
 const mapStateToProps = (state: RootState) => {
   return {
-    chats: state.chats
+    chats      : state.chats,
+    openingRoom: state.openingRoom
   }
 }
 
@@ -53,46 +56,48 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
   mapDispatchToProps
 )(
   class Chat extends React.Component<MapStateToProps & MapDispatchToProps & OwnProps, OwnState> {
-    static PropTypes = {
-      roomId: React.PropTypes.string
-    }
-
     public streamRoomMessageInstance: any
 
     constructor(props) {
       super(props)
     }
 
-    componentWillMount() {
-      this.initRoomMessaage()
-    }
+    componentWillReceiveProps(newProps) {
+      // console.log('this.props.openingRoom.room', this.props.openingRoom.room)
+      // console.log('newProps.openingRoom.room', newProps.openingRoom.room)
 
-    componentWillUnmount() {
-      this.unsubscribeRoomMessages()
+      if (!_.isEqual(this.props.openingRoom.room, newProps.openingRoom.room)) {
+        if (this.props.openingRoom.room && this.props.openingRoom.room._id) {
+          this.unsubscribeRoomMessages(this.props.openingRoom.room)
+        }
+        if (newProps.openingRoom.room && newProps.openingRoom.room._id) {
+          this.initRoomMessaage(newProps.openingRoom.room)
+        }
+      }
     }
 
     //load history of this room and subscribe this room
-    initRoomMessaage() {
-      const {roomId, loadRoomHistory, subscribeRoomMessages} = this.props
+    initRoomMessaage(room: RoomState) {
+      const {loadRoomHistory, subscribeRoomMessages} = this.props
 
-      loadRoomHistory(roomId).then(() => {
-        this.streamRoomMessageInstance = subscribeRoomMessages(roomId)
+      loadRoomHistory(room._id).then(() => {
+        this.streamRoomMessageInstance = subscribeRoomMessages(room._id)
       })
     }
 
     //unsubscribe this room
-    unsubscribeRoomMessages() {
-      const {roomId, unsubscribeRoomMessages} = this.props
+    unsubscribeRoomMessages(room: RoomState) {
+      const {unsubscribeRoomMessages} = this.props
       const streamRoomMessageInstance = this.streamRoomMessageInstance
 
       if (streamRoomMessageInstance) {
-        unsubscribeRoomMessages(streamRoomMessageInstance, roomId)
+        unsubscribeRoomMessages(streamRoomMessageInstance, room._id)
       }
     }
 
     _renderMessages() {
-      const {roomId, chats} = this.props
-      const chat = chats[roomId]
+      const {chats, openingRoom} = this.props
+      const chat = chats[openingRoom.room._id]
       const messages = chat && chat.messages
 
       if (messages && messages.length > 0) {
@@ -101,7 +106,7 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
             {
               messages.map((message, index) => {
                 const prevMessage = index > 0 ? messages[index - 1] : null
-                const nextMessage = index < messages.length - 1 ? messages[index + 1] : null
+                // const nextMessage = index < messages.length - 1 ? messages[index + 1] : null
 
                 return (
                   <Message key={index} prevMessage={prevMessage} message={message}/>
@@ -126,17 +131,22 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
     }
 
     render() {
-      return (
-        <div className={classnames('chat-container')}>
-          <style>{stylesheet}</style>
-          {
-            this._renderMessages()
-          }
-          {
-            this._renderMessageInput()
-          }
-        </div>
-      )
+      const {openingRoom} = this.props
+      if (openingRoom && openingRoom.room && openingRoom.room._id) {
+        return (
+          <div className={classnames('chat-container')}>
+            <style>{stylesheet}</style>
+            {
+              this._renderMessages()
+            }
+            {
+              this._renderMessageInput()
+            }
+          </div>
+        )
+      }
+
+      return null
     }
   }
 )

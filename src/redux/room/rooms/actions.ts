@@ -3,6 +3,11 @@ import actionTypes from './actionTypes'
 export const getRooms = () => {
   return (dispatch, getState, bancoRealtimeAPI) => {
     return new Promise((resolve, reject) => {
+      const roomsState = getState().rooms
+      if (roomsState.totalRooms.length > 0) {
+        return resolve()
+      }
+
       dispatch(getRoomsStarted())
 
       //load room history

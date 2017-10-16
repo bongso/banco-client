@@ -25,6 +25,7 @@ export interface RoomsState {
   directChatRooms: RoomState[],
   chatRooms: RoomState[],
   privateChatRooms: RoomState[],
+  totalRooms: RoomState[],
   loading: boolean,
   error: string | null
 }
@@ -33,6 +34,7 @@ const defaultRoomsState = {
   directChatRooms : [],
   chatRooms       : [],
   privateChatRooms: [],
+  totalRooms      : [],
   loading         : false,
   error           : null
 } as RoomsState
@@ -51,6 +53,7 @@ export const rooms: Reducer<RoomsState> = (state = defaultRoomsState, action) =>
         directChatRooms : action.payload.rooms.filter((x) => x.t == 'd'),
         chatRooms       : action.payload.rooms.filter((x) => x.t == 'c'),
         privateChatRooms: action.payload.rooms.filter((x) => x.t == 'p'),
+        totalRooms      : action.payload.rooms
       }
     case actionTypes.GET_ROOMS_FAILED:
       return {
@@ -64,6 +67,7 @@ export const rooms: Reducer<RoomsState> = (state = defaultRoomsState, action) =>
         directChatRooms : [...state.directChatRooms, ...action.payload.rooms.filter((x) => x.t == 'd')],
         chatRooms       : [...state.chatRooms, ...action.payload.rooms.filter((x) => x.t == 'c')],
         privateChatRooms: [...state.privateChatRooms, ...action.payload.rooms.filter((x) => x.t == 'p')],
+        totalRooms      : [...state.totalRooms, ...action.payload.rooms]
       }
     case actionTypes.LEAVE_ROOM_IN_LIST_SUCCEED:
       return {
@@ -71,6 +75,7 @@ export const rooms: Reducer<RoomsState> = (state = defaultRoomsState, action) =>
         directChatRooms : state.directChatRooms.filter((x) => x._id == action.payload.roomId),
         chatRooms       : state.chatRooms.filter((x) => x._id == action.payload.roomId),
         privateChatRooms: state.privateChatRooms.filter((x) => x._id == action.payload.roomId),
+        totalRooms      : state.privateChatRooms.filter((x) => x._id == action.payload.roomId),
       }
     default:
       return state

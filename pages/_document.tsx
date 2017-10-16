@@ -42,12 +42,20 @@ export default class BancoDocument extends Document {
           integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
           {...{crossOrigin: 'anonymous'}}
         />
+        
         <link
           rel="stylesheet"
           href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
           integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
           {...{crossOrigin: 'anonymous'}}
         />
+
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
+              integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw"
+              {...{crossOrigin: 'anonymous'}}
+        />
+
         {/*<style {...{jsx: true}}>{stylesheet}</style>*/}
 
         <link rel="shortcut icon" href="/static/img/favicon.ico"/>
