@@ -9,6 +9,7 @@ import {connectToServer} from '../../redux/connection/actions'
 import {OpeningRoomState} from '../../redux/room/openingRoom/reducer'
 import {Chat} from '../chat/Chat'
 import {Rooms} from '../rooms/Rooms'
+import {Subscriptions} from '../subscriptions/Subscriptions'
 import {ProfileSummary} from '../profileSummary/ProfileSummary'
 
 //Interface for Component's props

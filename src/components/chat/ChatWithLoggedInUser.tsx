@@ -11,7 +11,6 @@ import {RoomState} from '../../redux/room/rooms/reducer'
 import {Message} from '../message/Message'
 import {v1 as uuid} from 'uuid'
 import * as _ from 'lodash'
-import {SubscriptionState} from '../../redux/room/subscriptions/reducer'
 //Interface for Component's props
 interface OwnProps {
 }
@@ -68,37 +67,37 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       // console.log('newProps.openingRoom.room', newProps.openingRoom.room)
 
       if (!_.isEqual(this.props.openingRoom.room, newProps.openingRoom.room)) {
-        if (this.props.openingRoom.room && (this.props.openingRoom.room.rid || this.props.openingRoom.room._id)) {
+        if (this.props.openingRoom.room && this.props.openingRoom.room._id) {
           this.unsubscribeRoomMessages(this.props.openingRoom.room)
         }
-        if (newProps.openingRoom.room && (newProps.openingRoom.room.rid || newProps.openingRoom.room._id)) {
+        if (newProps.openingRoom.room && newProps.openingRoom.room._id) {
           this.initRoomMessaage(newProps.openingRoom.room)
         }
       }
     }
 
     //load history of this room and subscribe this room
-    initRoomMessaage(room: RoomState & SubscriptionState) {
+    initRoomMessaage(room: RoomState) {
       const {loadRoomHistory, subscribeRoomMessages} = this.props
 
-      loadRoomHistory(room.rid || room._id).then(() => {
-        this.streamRoomMessageInstance = subscribeRoomMessages(room.rid || room._id)
+      loadRoomHistory(room._id).then(() => {
+        this.streamRoomMessageInstance = subscribeRoomMessages(room._id)
       })
     }
 
     //unsubscribe this room
-    unsubscribeRoomMessages(room: RoomState & SubscriptionState) {
+    unsubscribeRoomMessages(room: RoomState) {
       const {unsubscribeRoomMessages} = this.props
       const streamRoomMessageInstance = this.streamRoomMessageInstance
 
       if (streamRoomMessageInstance) {
-        unsubscribeRoomMessages(streamRoomMessageInstance, room.rid || room._id)
+        unsubscribeRoomMessages(streamRoomMessageInstance, room._id)
       }
     }
 
     _renderMessages() {
       const {chats, openingRoom} = this.props
-      const chat = chats[openingRoom.room.rid || openingRoom.room._id]
+      const chat = chats[openingRoom.room._id]
       const messages = chat && chat.messages
 
       if (messages && messages.length > 0) {
@@ -133,7 +132,7 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
 
     render() {
       const {openingRoom} = this.props
-      if (openingRoom && openingRoom.room && (openingRoom.room.rid || openingRoom.room._id)) {
+      if (openingRoom && openingRoom.room && openingRoom.room._id) {
         return (
           <div className={classnames('chat-container')}>
             <style>{stylesheet}</style>

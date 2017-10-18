@@ -1,12 +1,12 @@
 import actionTypes from './actionTypes'
-import {RoomState} from './reducer'
-export const openRoom = (room: RoomState) => {
-  return (dispatch, getState, bancoRealtimeAPI) => {
+import {RoomState, SubscriptionState} from './reducer'
+export const openRoom = (room: RoomState & SubscriptionState) => {
+  return (dispatch, getState, {bancoRealtimeAPI, bancoRestAPI}) => {
     return new Promise((resolve, reject) => {
       dispatch(openRoomStarted())
 
       //load room history
-      bancoRealtimeAPI.callMethod('openRoom', room._id)
+      bancoRealtimeAPI.callMethod('openRoom', room.rid)
         .subscribe((msg) => {
           // console.log(response)
           dispatch(openRoomSucceed({

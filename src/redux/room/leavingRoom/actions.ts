@@ -1,6 +1,6 @@
 import actionTypes from './actionTypes'
 export const leaveRoom = (roomId: string) => {
-  return (dispatch, getState, bancoRealtimeAPI) => {
+  return (dispatch, getState, {bancoRealtimeAPI, bancoRestAPI}) => {
     return new Promise((resolve, reject) => {
       dispatch(leaveRoomStarted())
 

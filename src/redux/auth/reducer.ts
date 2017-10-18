@@ -5,20 +5,27 @@ export interface DateTimeState {
   $date: number
 }
 
-export interface AuthUserState {
-  id: string, //user-id
-  token: string, //username
+export interface UserState {
+  _id: string, //user-id
+  username: string //username
+}
+
+export interface AuthTokenState {
+  id: string,
+  token: string,
   tokenExpires: DateTimeState
 }
 
 export interface AuthState {
-  user: AuthUserState | null,
+  tokenInfo: AuthTokenState | null,
+  user: UserState | null,
   isLoggedIn: boolean,
   loading: boolean,
   error: string | null
 }
 
 const defaultAuthState = {
+  tokenInfo : null,
   user      : null,
   isLoggedIn: false,
   loading   : false,
@@ -33,12 +40,21 @@ export const auth: Reducer<AuthState> = (state = defaultAuthState, action) => {
         loading: true
       }
     case actionTypes.LOGIN_USER_SUCCEED:
-      return {
+      let newState = {
         ...state,
         loading   : false,
         isLoggedIn: true,
-        user      : action.payload.user
       }
+
+      if (action.payload.tokenInfo) {
+        newState.tokenInfo = action.payload.tokenInfo
+      }
+
+      if (action.payload.user) {
+        newState.user = action.payload.user
+      }
+
+      return newState
     case actionTypes.LOGIN_USER_FAILED:
       return {
         ...state,
@@ -56,6 +72,7 @@ export const auth: Reducer<AuthState> = (state = defaultAuthState, action) => {
         ...state,
         loading   : false,
         isLoggedIn: false,
+        tokenInfo : null,
         user      : null
       }
     case actionTypes.LOGOUT_USER_FAILED:

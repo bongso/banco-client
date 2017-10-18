@@ -74,17 +74,33 @@ export const Auth = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
     }
 
     onSubmit(evt) {
+      console.log(evt)
       evt.preventDefault()
-      // const value = this.refs.loginForm.getValue()
-      // if (value) {
-      //   console.log(value)
-      // }
+      const value = this.refs.loginForm.getValue()
+      if (value) {
+        console.log(value)
+
+        this.props.login(value.username, value.password)
+      }
     }
 
     _renderLoginForm() {
+      const loginFormOptions = {
+        auto  : 'placeholders',
+        fields: {
+          username: {},
+          password: {
+            type: 'password'
+          }
+        }
+      }
+
       return (
-        <form onSubmit={this.onSubmit}>
-          <t.form.Form ref="loginForm" type={FormSchema}/>
+        <form onSubmit={(evt) => this.onSubmit(evt)}>
+          <t.form.Form ref="loginForm"
+                       options={loginFormOptions}
+                       type={FormSchema}
+          />
           <div className="form-group">
             <button type="submit" className="btn btn-primary">Save</button>
           </div>

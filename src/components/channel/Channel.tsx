@@ -4,15 +4,18 @@ import {connect} from 'react-redux'
 import {RootState} from '../../redux/index'
 import stylesheet from './Channel.pcss'
 import {ConnectionState} from '../../redux/connection/reducer'
+import {StorageState} from '../../redux/storage/reducer'
 import {bindActionCreators} from 'redux'
 import {connectToServer} from '../../redux/connection/actions'
 import {OpeningRoomState} from '../../redux/room/openingRoom/reducer'
 import {Chat} from '../chat/Chat'
 import {Rooms} from '../rooms/Rooms'
+import {Subscriptions} from '../subscriptions/Subscriptions'
 import {ProfileSummary} from '../profileSummary/ProfileSummary'
 import {openRoom} from '../../redux/room/openingRoom/actions'
 import {getRooms} from '../../redux/room/rooms/actions'
 import {RoomsState, RoomState} from '../../redux/room/rooms/reducer'
+import {AuthState} from '../../redux/auth/reducer'
 
 //Interface for Component's props
 interface OwnProps {
@@ -26,16 +29,20 @@ interface OwnState {
 //Interface for Redux's state to component's props
 interface MapStateToProps {
   connection: ConnectionState,
+  storage: StorageState,
   openingRoom: OpeningRoomState,
-  rooms: RoomsState
+  rooms: RoomsState,
+  auth: AuthState
 }
 
 //Redux's state to component's props
 const mapStateToProps = (state: RootState) => {
   return {
     connection : state.connection,
+    storage    : state.storage,
     openingRoom: state.openingRoom,
-    rooms      : state.rooms
+    rooms      : state.rooms,
+    auth       : state.auth
   }
 }
 
@@ -72,6 +79,21 @@ export const Channel = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       connectToServer()
     }
 
+    _renderRooms() {
+      const channelName = this.props.channelName
+      const isLoggedIn = this.props.auth.isLoggedIn
+
+      if (isLoggedIn) {
+        return (
+          <Subscriptions selectedRoomName={channelName}/>
+        )
+      }
+
+      return (
+        <Rooms selectedRoomName={channelName}/>
+      )
+    }
+
     _renderScreen() {
       return (
         <div>
@@ -79,7 +101,9 @@ export const Channel = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
           <div className={classnames('screen')}>
             <aside className={classnames('sidebar')}>
               <ProfileSummary/>
-              <Rooms selectedRoomName={this.props.channelName}/>
+              {
+                this._renderRooms()
+              }
             </aside>
             <div className={classnames('main')}>
               <div className={classnames('main-header')}>
@@ -120,13 +144,14 @@ export const Channel = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
     render() {
       const connection: ConnectionState = this.props.connection
       const isConnectedServer: boolean = connection.isConnected
+      const isStorageLoaded: boolean = this.props.storage.storageLoaded
       const error: string = connection.error
 
       if (error) {
         return this._renderError(error)
       }
 
-      if (isConnectedServer) {
+      if (isConnectedServer && isStorageLoaded) {
         return this._renderScreen()
       }
       else {

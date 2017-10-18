@@ -1,7 +1,7 @@
 import actionTypes from './actionTypes'
 
 export const loadRoomHistory = (roomId: string) => {
-  return (dispatch, getState, bancoRealtimeAPI) => {
+  return (dispatch, getState, {bancoRealtimeAPI, bancoRestAPI}) => {
     return new Promise((resolve, reject) => {
       const now = {'$date': new Date().getTime()}
 
@@ -33,7 +33,7 @@ export const loadRoomHistory = (roomId: string) => {
 }
 
 export const subscribeRoomMessages = (roomId: string): any => {
-  return (dispatch, getState, bancoRealtimeAPI) => {
+  return (dispatch, getState, {bancoRealtimeAPI, bancoRestAPI}) => {
 
     //subscribe messages on room
     const streamRoomMessageInstance = bancoRealtimeAPI.getStreamRoomMessages(roomId).subscribe((msg) => {
@@ -59,7 +59,7 @@ export const subscribeRoomMessages = (roomId: string): any => {
 }
 
 export const unsubscribeRoomMessages = (streamRoomMessageInstance: any, roomId: string) => {
-  return (dispatch, getState, bancoRealtimeAPI) => {
+  return (dispatch, getState, {bancoRealtimeAPI, bancoRestAPI}) => {
     streamRoomMessageInstance.unsubscribe()
     dispatch(unsubscribeRoomSucceed({
       roomId: roomId,

@@ -10,17 +10,6 @@ export interface DateTimeState {
   $date: number
 }
 
-export interface RoomState {
-  _id: string, //The room id
-  t: string, //The room type (in this case c)
-  name: string | null, //The room name
-  u: UserState | null, //The room creator (it may return a null user)
-  topic: string | null, //(Optional) The room topic
-  muted: any | null, // (Optional) A collection of muted users by its username
-  jitsiTimeout: DateTimeState | null, // (Optional) (?)
-  ro: boolean | null //Flags if the room is read-only
-}
-
 export interface SubscriptionState {
   t: string,//The room type (the same used on the [room object][1])
   ts: DateTimeState | null,//Timestamp the room was created at, so this should equal the room’s ts field
@@ -36,34 +25,41 @@ export interface SubscriptionState {
   _id: string//The subscription id
 }
 
-export interface OpeningRoomState {
-  room: RoomState & SubscriptionState,
+export interface SubscriptionsState {
+  directChatRooms: SubscriptionState[],
+  chatRooms: SubscriptionState[],
+  privateChatRooms: SubscriptionState[],
+  totalRooms: SubscriptionState[],
   loading: boolean,
   error: string | null
 }
 
-const defaultOpeningRoomState = {
-  room   : null,
-  loading: false,
-  error  : null
-} as OpeningRoomState
+const defaultSubscriptionsState = {
+  directChatRooms : [],
+  chatRooms       : [],
+  privateChatRooms: [],
+  totalRooms      : [],
+  loading         : false,
+  error           : null
+} as SubscriptionsState
 
-export const openingRoom: Reducer<OpeningRoomState> = (state = defaultOpeningRoomState, action) => {
+export const subscriptions: Reducer<SubscriptionsState> = (state = defaultSubscriptionsState, action) => {
   switch (action.type) {
-    case actionTypes.OPEN_ROOM_STARTED:
+    case actionTypes.GET_SUBSCRIPTIONS_STARTED:
       return {
         ...state,
-        loading: true,
-        room   : null,
-        error  : null
+        loading: true
       }
-    case actionTypes.OPEN_ROOM_SUCCEED:
+    case actionTypes.GET_SUBSCRIPTIONS_SUCCEED:
       return {
         ...state,
-        loading: false,
-        room   : action.payload.room
+        loading         : false,
+        directChatRooms : action.payload.rooms.filter((x) => x.t == 'd'),
+        chatRooms       : action.payload.rooms.filter((x) => x.t == 'c'),
+        privateChatRooms: action.payload.rooms.filter((x) => x.t == 'p'),
+        totalRooms      : action.payload.rooms
       }
-    case actionTypes.OPEN_ROOM_FAILED:
+    case actionTypes.GET_SUBSCRIPTIONS_FAILED:
       return {
         ...state,
         loading: false,

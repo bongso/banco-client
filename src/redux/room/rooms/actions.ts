@@ -1,7 +1,7 @@
 import actionTypes from './actionTypes'
 
 export const getRooms = () => {
-  return (dispatch, getState, bancoRealtimeAPI) => {
+  return (dispatch, getState, {bancoRealtimeAPI, bancoRestAPI}) => {
     return new Promise((resolve, reject) => {
       const roomsState = getState().rooms
       if (roomsState.totalRooms.length > 0) {
@@ -10,7 +10,6 @@ export const getRooms = () => {
 
       dispatch(getRoomsStarted())
 
-      //load room history
       bancoRealtimeAPI.callMethod('rooms/getAll')
         .subscribe((msg) => {
           // console.log(response)
@@ -52,16 +51,16 @@ const getRoomsFailed = (payload: any) => {
   }
 }
 
-export const createPrivateRoomInListSucceed = (payload: any) => {
-  return {
-    type   : actionTypes.CREATE_PRIVATE_ROOM_IN_LIST_SUCCEED,
-    payload: payload
-  }
-}
-
-export const leaveRoomInListSucceed = (payload: any) => {
-  return {
-    type   : actionTypes.LEAVE_ROOM_IN_LIST_SUCCEED,
-    payload: payload
-  }
-}
+// export const createPrivateRoomInListSucceed = (payload: any) => {
+//   return {
+//     type   : actionTypes.CREATE_PRIVATE_ROOM_IN_LIST_SUCCEED,
+//     payload: payload
+//   }
+// }
+//
+// export const leaveRoomInListSucceed = (payload: any) => {
+//   return {
+//     type   : actionTypes.LEAVE_ROOM_IN_LIST_SUCCEED,
+//     payload: payload
+//   }
+// }

@@ -34,8 +34,6 @@
     "react-timeago": "^3.4.3",
     "react-user-avatar": "^1.9.0",
     "redux": "^3.7.1",
-    "redux-fetch": "https://github.com/deptno/redux-fetch.git#refac/v2",
-    "redux-observable": "^0.16.0",
     "redux-persist": "^4.9.1",
     "redux-thunk": "^2.2.0",
     "rxjs": "^5.4.3",

@@ -5,7 +5,7 @@ import {RootState} from '../../redux/index'
 import stylesheet from './ProfileSummary.pcss'
 import {bindActionCreators} from 'redux'
 import {AuthState} from '../../redux/auth/reducer'
-import {login, loginWithOAuth, logout} from '../../redux/auth/actions'
+import {login, loginWithAuthToken, loginWithOAuth, logout} from '../../redux/auth/actions'
 import {Auth} from '../auth/Auth'
 import * as Modal from 'react-modal'
 import {IoCloseRound} from 'react-icons/lib/io'
@@ -35,6 +35,7 @@ const mapStateToProps = (state: RootState) => {
 //Interface for Redux's dispatch to component's props
 interface MapDispatchToProps {
   login,
+  loginWithAuthToken,
   loginWithOAuth,
   logout
 }
@@ -43,6 +44,7 @@ interface MapDispatchToProps {
 const mapDispatchToProps = (dispatch): MapDispatchToProps => {
   const actionCreators = {
     login,
+    loginWithAuthToken,
     loginWithOAuth,
     logout
   }
@@ -68,9 +70,14 @@ export const ProfileSummary = connect<MapStateToProps, MapDispatchToProps, OwnPr
     }
 
     componentWillReceiveProps(newProps) {
+      if (newProps.auth.isLoggedIn && this.props.auth.isLoggedIn != newProps.auth.isLoggedIn) {
+        this.closeModal()
+      }
     }
 
     componentWillMount() {
+      const {loginWithAuthToken} = this.props
+      loginWithAuthToken()
     }
 
     openModal() {
@@ -88,8 +95,23 @@ export const ProfileSummary = connect<MapStateToProps, MapDispatchToProps, OwnPr
     _renderProfileSummary() {
       const {auth} = this.props
 
+      if (auth && auth.user && auth.user.username) {
+        const username = auth.user.username
+
+        return (
+          <div className={classnames('profile-summary')}>
+            <UserAvatar size="40" name={username} style={{color:'#ffffff'}} />
+            <a><h6 className={classnames('username')}>
+              {
+                username
+              }
+            </h6></a>
+          </div>
+        )
+      }
+
       return (
-        <div className={classnames('profile-summary')}>
+        <div className={classnames('profile-summary clickable')} onClick={() => this.openModal()}>
           <UserAvatar size="40" color={'#aaaaaa'} name="Anonymous"/>
           <a><h6 className={classnames('username')}>Login</h6></a>
         </div>

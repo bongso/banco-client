@@ -2,11 +2,11 @@ import * as React from 'react'
 import * as classnames from 'classnames'
 import {connect} from 'react-redux'
 import {RootState} from '../../redux/index'
-import stylesheet from './Rooms.pcss'
+import stylesheet from './Subscriptions.pcss'
 import {bindActionCreators} from 'redux'
-import {getRooms} from '../../redux/room/rooms/actions'
+import {getSubscriptions} from '../../redux/room/subscriptions/actions'
 import {openRoom} from '../../redux/room/openingRoom/actions'
-import {RoomsState, RoomState} from '../../redux/room/rooms/reducer'
+import {SubscriptionsState, SubscriptionState} from '../../redux/room/subscriptions/reducer'
 import Link from 'next/link'
 
 //Interface for Component's props
@@ -20,37 +20,37 @@ interface OwnState {
 
 //Interface for Redux's state to component's props
 interface MapStateToProps {
-  rooms: RoomsState
+  subscriptions: SubscriptionsState
 }
 
 //Redux's state to component's props
 const mapStateToProps = (state: RootState) => {
   return {
-    rooms: state.rooms
+    subscriptions: state.subscriptions
   }
 }
 
 //Interface for Redux's dispatch to component's props
 interface MapDispatchToProps {
-  getRooms,
+  getSubscriptions,
   openRoom
 }
 
 //Redux's dispatch to component's props
 const mapDispatchToProps = (dispatch): MapDispatchToProps => {
   const actionCreators = {
-    getRooms,
+    getSubscriptions,
     openRoom
   }
 
   return bindActionCreators(actionCreators, dispatch)
 }
 
-export const Rooms = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
+export const Subscriptions = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
   mapStateToProps,
   mapDispatchToProps
 )(
-  class Rooms extends React.Component<MapStateToProps & MapDispatchToProps & OwnProps, OwnState> {
+  class Subscriptions extends React.Component<MapStateToProps & MapDispatchToProps & OwnProps, OwnState> {
     constructor(props) {
       super(props)
     }
@@ -72,8 +72,8 @@ export const Rooms = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
 
     //load history of this room and subscribe this room
     initRooms() {
-      const {getRooms, openRoom, selectedRoomName} = this.props
-      getRooms().then(() => {
+      const {getSubscriptions, openRoom, selectedRoomName} = this.props
+      getSubscriptions().then(() => {
         if (selectedRoomName && this.getRoomByName(selectedRoomName)) {
           openRoom(this.getRoomByName(selectedRoomName))
         }
@@ -81,22 +81,22 @@ export const Rooms = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
     }
 
     getRoomByName(roomName: string) {
-      return this.props.rooms.totalRooms.find((x) => x.name == roomName)
+      return this.props.subscriptions.totalRooms.find((x) => x.name == roomName)
     }
 
-    _renderRoom(room: RoomState, index: number) {
-      const url = '/channel?channelName=' + room.name
-      const isSelected = room.name == this.props.selectedRoomName
+    _renderRoom(subscription: SubscriptionState, index: number) {
+      const url = '/channel?channelName=' + subscription.name
+      const isSelected = subscription.name == this.props.selectedRoomName
       return (
         <Link href={url} key={index}>
           <a className={classnames('room', isSelected ? 'selected' : null)}>
-            # {room.name}
+            # {subscription.name}
           </a>
         </Link>
       )
     }
 
-    _renderRooms(roomsSectionName: string, chatRooms: RoomState[]) {
+    _renderRooms(roomsSectionName: string, chatRooms: SubscriptionState[]) {
       return (
         <div>
           <div className={classnames('rooms-section-container')}>
@@ -113,8 +113,8 @@ export const Rooms = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
           </div>
           <div>
             {
-              chatRooms.map((room, index) => {
-                return this._renderRoom(room, index)
+              chatRooms.map((subscription, index) => {
+                return this._renderRoom(subscription, index)
               })
             }
           </div>
@@ -123,22 +123,22 @@ export const Rooms = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
     }
 
     _renderRoomsContainer() {
-      const rooms = this.props.rooms
+      const subscriptions = this.props.subscriptions
 
-      if (rooms.loading) {
+      if (subscriptions.loading) {
         return this._renderLoading()
       }
       else {
         return (
           <div>
             {
-              this._renderRooms('Channels', rooms.chatRooms)
+              this._renderRooms('Channels', subscriptions.chatRooms)
             }
             {
-              this._renderRooms('Private Groups', rooms.privateChatRooms)
+              this._renderRooms('Private Groups', subscriptions.privateChatRooms)
             }
             {
-              this._renderRooms('Direct Messages', rooms.directChatRooms)
+              this._renderRooms('Direct Messages', subscriptions.directChatRooms)
             }
           </div>
         )

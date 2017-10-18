@@ -61,22 +61,22 @@ export const rooms: Reducer<RoomsState> = (state = defaultRoomsState, action) =>
         loading: false,
         error  : action.payload.error
       }
-    case actionTypes.CREATE_PRIVATE_ROOM_IN_LIST_SUCCEED:
-      return {
-        ...state,
-        directChatRooms : [...state.directChatRooms, ...action.payload.rooms.filter((x) => x.t == 'd')],
-        chatRooms       : [...state.chatRooms, ...action.payload.rooms.filter((x) => x.t == 'c')],
-        privateChatRooms: [...state.privateChatRooms, ...action.payload.rooms.filter((x) => x.t == 'p')],
-        totalRooms      : [...state.totalRooms, ...action.payload.rooms]
-      }
-    case actionTypes.LEAVE_ROOM_IN_LIST_SUCCEED:
-      return {
-        ...state,
-        directChatRooms : state.directChatRooms.filter((x) => x._id == action.payload.roomId),
-        chatRooms       : state.chatRooms.filter((x) => x._id == action.payload.roomId),
-        privateChatRooms: state.privateChatRooms.filter((x) => x._id == action.payload.roomId),
-        totalRooms      : state.privateChatRooms.filter((x) => x._id == action.payload.roomId),
-      }
+    // case actionTypes.CREATE_PRIVATE_ROOM_IN_LIST_SUCCEED:
+    //   return {
+    //     ...state,
+    //     directChatRooms : [...state.directChatRooms, ...action.payload.rooms.filter((x) => x.t == 'd')],
+    //     chatRooms       : [...state.chatRooms, ...action.payload.rooms.filter((x) => x.t == 'c')],
+    //     privateChatRooms: [...state.privateChatRooms, ...action.payload.rooms.filter((x) => x.t == 'p')],
+    //     totalRooms      : [...state.totalRooms, ...action.payload.rooms]
+    //   }
+    // case actionTypes.LEAVE_ROOM_IN_LIST_SUCCEED:
+    //   return {
+    //     ...state,
+    //     directChatRooms : state.directChatRooms.filter((x) => x._id == action.payload.roomId),
+    //     chatRooms       : state.chatRooms.filter((x) => x._id == action.payload.roomId),
+    //     privateChatRooms: state.privateChatRooms.filter((x) => x._id == action.payload.roomId),
+    //     totalRooms      : state.privateChatRooms.filter((x) => x._id == action.payload.roomId),
+    //   }
     default:
       return state
   }

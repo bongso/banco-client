@@ -1,7 +1,7 @@
 import actionTypes from './actionTypes'
 
 export const connectToServer = () => {
-  return (dispatch, getState, bancoRealtimeAPI) => {
+  return (dispatch, getState, {bancoRealtimeAPI, bancoRestAPI}) => {
     return new Promise((resolve, reject) => {
       const connectionState = getState().connection;
       if(connectionState.isConnected){
@@ -9,7 +9,7 @@ export const connectToServer = () => {
       }
 
       dispatch(initConnection())
-
+      
       bancoRealtimeAPI.connectToServer()
         .subscribe((msg) => {
           // console.log(response)
