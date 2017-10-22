@@ -69,9 +69,9 @@ class BancoRealtimeAPI {
   }
 
   /**
-   * sendMessage to Rocket.Chat Server
+   * sendMessageToServer to Rocket.Chat Server
    */
-  public sendMessage(messageObject: {}): void {
+  public sendMessageToServer(messageObject: {}): void {
     this.webSocket.next(JSON.stringify(messageObject))
   }
 
@@ -93,7 +93,7 @@ class BancoRealtimeAPI {
    * connectToServer
    */
   public connectToServer() {
-    this.sendMessage({'msg': 'connect', 'version': '1', 'support': ['1', 'pre2', 'pre1']})
+    this.sendMessageToServer({'msg': 'connect', 'version': '1', 'support': ['1', 'pre2', 'pre1']})
     return this.getObservableFilteredByMessageType('connected')
   }
 
@@ -105,7 +105,7 @@ class BancoRealtimeAPI {
     this.getObservableFilteredByMessageType('ping').subscribe(
       message => {
         if (this.isKeepAlive) {
-          this.sendMessage({msg: 'pong'})
+          this.sendMessageToServer({msg: 'pong'})
         }
       }
     )
@@ -122,7 +122,7 @@ class BancoRealtimeAPI {
   public login(username: string, password: string) {
     let id = uuid()
     let usernameType = username.indexOf('@') !== -1 ? 'email' : 'username'
-    this.sendMessage({
+    this.sendMessageToServer({
       'msg'   : 'method',
       'method': 'login',
       'id'    : id,
@@ -144,7 +144,7 @@ class BancoRealtimeAPI {
    */
   public loginWithAuthToken(authToken: string) {
     let id = uuid()
-    this.sendMessage({
+    this.sendMessageToServer({
       'msg'   : 'method',
       'method': 'login',
       'id'    : id,
@@ -160,7 +160,7 @@ class BancoRealtimeAPI {
    */
   public loginWithOAuth(credToken: string, credSecret: string) {
     let id = uuid()
-    this.sendMessage({
+    this.sendMessageToServer({
       'msg'   : 'method',
       'method': 'login',
       'id'    : id,
@@ -194,12 +194,36 @@ class BancoRealtimeAPI {
   }
 
   /**
+   * send message
+   * @param {string} messageId
+   * @param {string} rid
+   * @param {string} message
+   * @returns {Observable<T>}
+   */
+  public sendMessage(messageId: string, rid: string, message: string) {
+    let id = uuid()
+    this.sendMessageToServer({
+      'msg'   : 'method',
+      'method': 'sendMessage',
+      'id'    : id,
+      'params': [
+        {
+          '_id': messageId,
+          'rid': rid,
+          'msg': message
+        }
+      ]
+    })
+
+    return this.getObservableFilteredByID(id)
+  }
+
+  /**
    * Get Observalble to the Result of Method Call from Rocket.Chat Banco API
    */
   public callMethod(method: string, ...params: Array<{}>) {
     let id = uuid()
-
-    this.sendMessage({
+    this.sendMessageToServer({
       'msg': 'method',
       id,
       method,
@@ -215,7 +239,7 @@ class BancoRealtimeAPI {
   public getSubscription(streamName: string, streamParam: string, addEvent: boolean) {
     let id = uuid()
 
-    // this.sendMessage({
+    // this.sendMessageToServer({
     //   'msg'   : 'sub',
     //   'id'    : id,
     //   'name'  : streamName,
@@ -251,7 +275,7 @@ class BancoRealtimeAPI {
   }
 
   public unsubscribe(subscriptionId: string | null) {
-    this.sendMessage({
+    this.sendMessageToServer({
       'msg': 'unsub',
       'id' : subscriptionId
     })

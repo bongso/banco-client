@@ -5,9 +5,11 @@ import {RootState} from '../../redux/index'
 import stylesheet from './Chat.pcss'
 import {bindActionCreators} from 'redux'
 import {loadRoomHistory, subscribeRoomMessages, unsubscribeRoomMessages} from '../../redux/chats/actions'
+import {sendMessage, deleteSentMessage} from '../../redux/message/sendMessages/actions'
 import {ChatsStates} from '../../redux/chats/reducer'
 import {OpeningRoomState} from '../../redux/room/openingRoom/reducer'
 import {RoomState} from '../../redux/room/rooms/reducer'
+import {AuthState} from '../../redux/auth/reducer'
 import {Message} from '../message/Message'
 import {v1 as uuid} from 'uuid'
 import * as _ from 'lodash'
@@ -18,10 +20,12 @@ interface OwnProps {
 
 //Interface for Component's state
 interface OwnState {
+  newMessage: string
 }
 
 //Interface for Redux's state to component's props
 interface MapStateToProps {
+  auth: AuthState,
   chats: ChatsStates,
   openingRoom: OpeningRoomState
 }
@@ -29,6 +33,7 @@ interface MapStateToProps {
 //Redux's state to component's props
 const mapStateToProps = (state: RootState) => {
   return {
+    auth       : state.auth,
     chats      : state.chats,
     openingRoom: state.openingRoom
   }
@@ -38,7 +43,9 @@ const mapStateToProps = (state: RootState) => {
 interface MapDispatchToProps {
   loadRoomHistory,
   subscribeRoomMessages,
-  unsubscribeRoomMessages
+  unsubscribeRoomMessages,
+  sendMessage,
+  deleteSentMessage
 }
 
 //Redux's dispatch to component's props
@@ -46,7 +53,9 @@ const mapDispatchToProps = (dispatch): MapDispatchToProps => {
   const actionCreators = {
     loadRoomHistory,
     subscribeRoomMessages,
-    unsubscribeRoomMessages
+    unsubscribeRoomMessages,
+    sendMessage,
+    deleteSentMessage
   }
 
   return bindActionCreators(actionCreators, dispatch)
@@ -61,6 +70,9 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
 
     constructor(props) {
       super(props)
+      this.state = {
+        newMessage: ''
+      }
     }
 
     componentWillReceiveProps(newProps) {
@@ -96,6 +108,23 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       }
     }
 
+    changeMessage(event) {
+      this.setState({newMessage: event.target.value})
+    }
+
+    submitMessage(event) {
+      event.preventDefault()
+
+      if (this.state.newMessage) {
+        console.log('new message : ', this.state.newMessage)
+        this.props.sendMessage(this.props.openingRoom.room.rid || this.props.openingRoom.room._id, this.state.newMessage)
+
+        this.setState({
+          newMessage: ''
+        })
+      }
+    }
+
     _renderMessages() {
       const {chats, openingRoom} = this.props
       const chat = chats[openingRoom.room.rid || openingRoom.room._id]
@@ -122,10 +151,26 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       }
     }
 
-    _renderMessageInput() {
+    _renderMessageForm() {
+      if (this.props.auth.isLoggedIn)
+        return (
+          <form className={classnames('input-group')} onSubmit={(event) => this.submitMessage(event)}>
+            <input type="text" value={this.state.newMessage} onChange={(event) => this.changeMessage(event)}
+                   className={classnames('form-control')} placeholder="Message..." aria-label="Message..."/>
+            <span className={classnames('input-group-btn')}>
+                <button type="submit" className={classnames('btn btn-secondary')}>Send</button>
+              </span>
+          </form>
+        )
+    }
+
+    _renderNewMessage() {
       return (
         <div className={classnames('chat-input-container')}>
           <div className={classnames('chat-input')}>
+            {
+              this._renderMessageForm()
+            }
           </div>
         </div>
       )
@@ -141,7 +186,7 @@ export const Chat = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
               this._renderMessages()
             }
             {
-              this._renderMessageInput()
+              this._renderNewMessage()
             }
           </div>
         )

@@ -37,7 +37,8 @@ export const auth: Reducer<AuthState> = (state = defaultAuthState, action) => {
     case actionTypes.LOGIN_USER_STARTED:
       return {
         ...state,
-        loading: true
+        loading: true,
+        error  : null
       }
     case actionTypes.LOGIN_USER_SUCCEED:
       let newState = {
@@ -60,12 +61,15 @@ export const auth: Reducer<AuthState> = (state = defaultAuthState, action) => {
         ...state,
         loading   : false,
         isLoggedIn: false,
+        tokenInfo : null,
+        user      : null,
         error     : action.payload.error
       }
     case actionTypes.LOGOUT_USER_STARTED:
       return {
         ...state,
-        loading: true
+        loading: true,
+        error  : null
       }
     case actionTypes.LOGOUT_USER_SUCCEED:
       return {

@@ -11,6 +11,14 @@ export const login = (username: string, password: string) => {
         .subscribe((msg) => {
           // console.log('login',msg)
 
+          if (msg.error) {
+            dispatch(loginUserFailed({
+              error: msg.error.reason
+            }))
+
+            return reject(msg.error.reason)
+          }
+
           if (msg.msg == 'result') {
             dispatch(loginUserSucceed({
               tokenInfo: msg && msg.result
@@ -30,7 +38,7 @@ export const login = (username: string, password: string) => {
         }, (err) => {
           //TODO::display error message
           // console.log('error',err)
-          dispatch(loginUSerFailed({
+          dispatch(loginUserFailed({
             error: err
           }))
 
@@ -54,6 +62,14 @@ export const loginWithAuthToken = () => {
       //load room history
       bancoRealtimeAPI.loginWithAuthToken(authToken)
         .subscribe((msg) => {
+          if (msg.error && msg.error.message) {
+            dispatch(loginUserFailed({
+              error: msg.error.message
+            }))
+
+            return reject(msg.error.message)
+          }
+
           // console.log(response)
           dispatch(loginUserSucceed({
             tokenInfo: msg && msg.result
@@ -66,7 +82,7 @@ export const loginWithAuthToken = () => {
         }, (err) => {
           //TODO::display error message
           console.log(err)
-          dispatch(loginUSerFailed({
+          dispatch(loginUserFailed({
             error: err
           }))
 
@@ -96,7 +112,7 @@ export const loginWithOAuth = (credToken: string, credSecret: string) => {
         }, (err) => {
           //TODO::display error message
           console.log(err)
-          dispatch(loginUSerFailed({
+          dispatch(loginUserFailed({
             error: err
           }))
 
@@ -128,7 +144,7 @@ const loginUserSucceed = (payload: any) => {
   }
 }
 
-const loginUSerFailed = (payload: any) => {
+const loginUserFailed = (payload: any) => {
   return {
     type   : actionTypes.LOGIN_USER_FAILED,
     payload: payload
@@ -147,7 +163,7 @@ const logoutUserSucceed = () => {
   }
 }
 
-const logoutUSerFailed = (payload: any) => {
+const logoutUserFailed = (payload: any) => {
   return {
     type   : actionTypes.LOGOUT_USER_FAILED,
     payload: payload

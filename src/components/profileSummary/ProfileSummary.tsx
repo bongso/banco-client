@@ -6,7 +6,8 @@ import stylesheet from './ProfileSummary.pcss'
 import {bindActionCreators} from 'redux'
 import {AuthState} from '../../redux/auth/reducer'
 import {login, loginWithAuthToken, loginWithOAuth, logout} from '../../redux/auth/actions'
-import {Auth} from '../auth/Auth'
+import {Login} from '../auth/login/Login'
+import {Register} from '../auth/register/Register'
 import * as Modal from 'react-modal'
 import {IoCloseRound} from 'react-icons/lib/io'
 import * as UserAvatar from 'react-user-avatar'
@@ -17,7 +18,8 @@ interface OwnProps {
 
 //Interface for Component's state
 interface OwnState {
-  modalIsOpen: boolean
+  isOpenedModal: boolean,
+  isOpenedRegisterView: boolean
 }
 
 //Interface for Redux's state to component's props
@@ -61,7 +63,8 @@ export const ProfileSummary = connect<MapStateToProps, MapDispatchToProps, OwnPr
       super(props)
 
       this.state = {
-        modalIsOpen: false
+        isOpenedModal       : false,
+        isOpenedRegisterView: false
       }
 
       this.openModal = this.openModal.bind(this)
@@ -76,12 +79,14 @@ export const ProfileSummary = connect<MapStateToProps, MapDispatchToProps, OwnPr
     }
 
     componentWillMount() {
-      const {loginWithAuthToken} = this.props
-      loginWithAuthToken()
+      const {loginWithAuthToken, logout} = this.props
+      loginWithAuthToken().then(null, () => {
+        logout()
+      })
     }
 
     openModal() {
-      this.setState({modalIsOpen: true})
+      this.setState({isOpenedModal: true})
     }
 
     afterOpenModal() {
@@ -89,8 +94,22 @@ export const ProfileSummary = connect<MapStateToProps, MapDispatchToProps, OwnPr
     }
 
     closeModal() {
-      this.setState({modalIsOpen: false})
+      this.setState({isOpenedModal: false})
     }
+
+    logout() {
+      this.props.logout()
+    }
+
+    openRegisterView() {
+      this.setState({isOpenedRegisterView: true})
+
+    }
+
+    closeRegisterView() {
+      this.setState({isOpenedRegisterView: false})
+    }
+
 
     _renderProfileSummary() {
       const {auth} = this.props
@@ -99,8 +118,8 @@ export const ProfileSummary = connect<MapStateToProps, MapDispatchToProps, OwnPr
         const username = auth.user.username
 
         return (
-          <div className={classnames('profile-summary')}>
-            <UserAvatar size="40" name={username} style={{color:'#ffffff'}} />
+          <div className={classnames('profile-summary')} onClick={() => this.openModal()}>
+            <UserAvatar size="40" name={username} style={{color: '#ffffff'}}/>
             <a><h6 className={classnames('username')}>
               {
                 username
@@ -118,36 +137,107 @@ export const ProfileSummary = connect<MapStateToProps, MapDispatchToProps, OwnPr
       )
     }
 
-    _renderLoginModal() {
-      const modalIsOpen = this.state.modalIsOpen
+    _renderRegister() {
+      const isOpenedRegisterView = this.state.isOpenedRegisterView
 
+      if (!isOpenedRegisterView) {
+        return null
+      }
+
+      return (
+        <div>
+          <div className={classnames('auth-modal-header')}>
+            <h5 className={classnames('title')}>
+              Register
+            </h5>
+            <IoCloseRound size={18} className={classnames('clickable')} onClick={this.closeModal}></IoCloseRound>
+          </div>
+          <Register/>
+
+          <button type="button" className={classnames('btn btn-block btn-link')}
+                  onClick={() => this.closeRegisterView()}>
+            Login
+          </button>
+        </div>
+      )
+    }
+
+    _renderLogin() {
+      const isOpenedRegisterView = this.state.isOpenedRegisterView
+
+      if (isOpenedRegisterView) {
+        return null
+      }
+
+      return (
+        <div>
+          <div className={classnames('auth-modal-header')}>
+            <h5 className={classnames('title')}>
+              Login
+            </h5>
+            <IoCloseRound size={18} className={classnames('clickable')} onClick={this.closeModal}></IoCloseRound>
+          </div>
+          <Login/>
+
+          <button type="button" className={classnames('btn btn-block btn-link')}
+                  onClick={() => this.openRegisterView()}>
+            Register
+          </button>
+        </div>
+      )
+    }
+
+    _renderProfile() {
+      const user = this.props.auth.user
+
+      return (
+        <div>
+          <div className={classnames('auth-modal-header')}>
+            <h5 className={classnames('title')}>
+              {user.username}
+            </h5>
+            <IoCloseRound size={18} className={classnames('clickable')} onClick={this.closeModal}></IoCloseRound>
+          </div>
+          <div className={classnames('auth-profile-container')}>
+            <UserAvatar size="200" name={user.username} style={{color: '#ffffff'}}/>
+          </div>
+          <div className={classnames('auth-profile-menu-container')}>
+            <button type="button" className={classnames('btn btn-block btn-link')}
+                    onClick={() => this.logout()}>
+              Logout
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    _renderLoginModal() {
+      const isOpenedModal = this.state.isOpenedModal
+      const user = this.props.auth.user
       return (
         <Modal
           className={classnames('auth-modal')}
-          isOpen={modalIsOpen}
+          isOpen={isOpenedModal}
           closeTimeoutMS={200}
           onAfterOpen={this.afterOpenModal}
           onRequestClose={this.closeModal}
           contentLabel="Login Modal"
         >
           <div className={classnames('auth-modal-container')}>
-
             <div
-              className={classnames('auth-modal-login-container', 'animated', modalIsOpen ? 'slideInLeft' : 'slideOutLeft')}>
-              <div className={classnames('auth-modal-header')}>
-                <h5 className={classnames('title')}>
-                  Login
-                </h5>
-                <IoCloseRound size={18} onClick={this.closeModal}></IoCloseRound>
-              </div>
-              <Auth/>
+              className={classnames('auth-modal-login-container', 'animated', isOpenedModal ? 'slideInLeft' : 'slideOutLeft')}>
+
+              {
+                user ?
+                  this._renderProfile() :
+                  <div>
+                    {this._renderLogin()}
+                    {this._renderRegister()}
+                  </div>
+              }
+
             </div>
-
-            {/*<div className={classnames('auth-modal-introduce-service-container')}>*/}
-            {/*service*/}
-            {/*</div>*/}
           </div>
-
         </Modal>
       )
     }

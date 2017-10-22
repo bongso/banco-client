@@ -1,17 +1,17 @@
 import * as React from 'react'
 import * as classnames from 'classnames'
 import {connect} from 'react-redux'
-import {RootState} from '../../redux/index'
-import stylesheet from './Auth.pcss'
+import {RootState} from '../../../redux/index'
+import stylesheet from './Login.pcss'
 import {bindActionCreators} from 'redux'
-import {AuthState} from '../../redux/auth/reducer'
-import {login, loginWithOAuth, logout} from '../../redux/auth/actions'
+import {AuthState} from '../../../redux/auth/reducer'
+import {login, loginWithOAuth, logout} from '../../../redux/auth/actions'
 import * as t from 'tcomb-form'
 
-const FormSchema = t.struct({
-  username  : t.String,         // a required string
-  password  : t.String, // an optional number
-  rememberMe: t.Boolean   // a boolean
+const loginFormSchema = t.struct({
+  username: t.String,         // a required string
+  password: t.String, // an optional number
+  // rememberMe: t.Boolean   // a boolean
 })
 
 //Interface for Component's props
@@ -52,11 +52,11 @@ const mapDispatchToProps = (dispatch): MapDispatchToProps => {
   return bindActionCreators(actionCreators, dispatch)
 }
 
-export const Auth = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
+export const Login = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
   mapStateToProps,
   mapDispatchToProps
 )(
-  class Auth extends React.Component<MapStateToProps & MapDispatchToProps & OwnProps, OwnState> {
+  class Login extends React.Component<MapStateToProps & MapDispatchToProps & OwnProps, OwnState> {
     constructor(props) {
       super(props)
     }
@@ -73,7 +73,7 @@ export const Auth = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       return null
     }
 
-    onSubmit(evt) {
+    onSubmitLogin(evt) {
       console.log(evt)
       evt.preventDefault()
       const value = this.refs.loginForm.getValue()
@@ -96,10 +96,21 @@ export const Auth = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       }
 
       return (
-        <form onSubmit={(evt) => this.onSubmit(evt)}>
+        <form onSubmit={(evt) => this.onSubmitLogin(evt)}>
+          {
+            this.props.auth.error ?
+              <div className={classnames('alert alert-danger')} role="alert">
+                {
+                  this.props.auth.error
+                }
+              </div>
+              :
+              null
+          }
+          
           <t.form.Form ref="loginForm"
                        options={loginFormOptions}
-                       type={FormSchema}
+                       type={loginFormSchema}
           />
           <div className="form-group">
             <button type="submit" className="btn btn-primary">Save</button>
@@ -110,7 +121,7 @@ export const Auth = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
 
     render() {
       return (
-        <div className={classnames('chat-container')}>
+        <div>
           <style>{stylesheet}</style>
           {
             this._renderLoginForm()

@@ -94,6 +94,18 @@ export const Channel = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
       )
     }
 
+    _renderChannelName(){
+      if(this.props.channelName){
+        return (
+          <div className={classnames('main-channel-name')}>
+            #{this.props.channelName}
+          </div>
+        )
+      }
+
+      return null
+    }
+
     _renderScreen() {
       return (
         <div>
@@ -107,11 +119,13 @@ export const Channel = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
             </aside>
             <div className={classnames('main')}>
               <div className={classnames('main-header')}>
-                main-header
+                {
+                  this._renderChannelName()
+                }
               </div>
               <div className={classnames('main-content')}>
                 <div className={classnames('chart-content')}>
-                  chart content here
+                  
                 </div>
                 <div className={classnames('chat-content')}>
                   <Chat/>

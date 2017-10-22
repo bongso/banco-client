@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 import {RootState} from '../../redux/index'
 import stylesheet from './Index.pcss'
 import {ConnectionState} from '../../redux/connection/reducer'
+import {StorageState} from '../../redux/storage/reducer'
 import {bindActionCreators} from 'redux'
 import {connectToServer} from '../../redux/connection/actions'
 import {OpeningRoomState} from '../../redux/room/openingRoom/reducer'
@@ -11,9 +12,14 @@ import {Chat} from '../chat/Chat'
 import {Rooms} from '../rooms/Rooms'
 import {Subscriptions} from '../subscriptions/Subscriptions'
 import {ProfileSummary} from '../profileSummary/ProfileSummary'
+import {openRoom} from '../../redux/room/openingRoom/actions'
+import {getRooms} from '../../redux/room/rooms/actions'
+import {RoomsState, RoomState} from '../../redux/room/rooms/reducer'
+import {AuthState} from '../../redux/auth/reducer'
 
 //Interface for Component's props
 interface OwnProps {
+  channelName: string
 }
 
 //Interface for Component's state
@@ -23,26 +29,36 @@ interface OwnState {
 //Interface for Redux's state to component's props
 interface MapStateToProps {
   connection: ConnectionState,
-  openingRoom: OpeningRoomState
+  storage: StorageState,
+  openingRoom: OpeningRoomState,
+  rooms: RoomsState,
+  auth: AuthState
 }
 
 //Redux's state to component's props
 const mapStateToProps = (state: RootState) => {
   return {
     connection : state.connection,
-    openingRoom: state.openingRoom
+    storage    : state.storage,
+    openingRoom: state.openingRoom,
+    rooms      : state.rooms,
+    auth       : state.auth
   }
 }
 
 //Interface for Redux's dispatch to component's props
 interface MapDispatchToProps {
-  connectToServer
+  connectToServer,
+  openRoom,
+  getRooms,
 }
 
 //Redux's dispatch to component's props
 const dispatchToProps = (dispatch): MapDispatchToProps => {
   const actionCreators = {
-    connectToServer
+    connectToServer,
+    openRoom,
+    getRooms
   }
 
   return bindActionCreators(actionCreators, dispatch)
@@ -54,39 +70,66 @@ export const Index = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
   dispatchToProps
 )(
   class Index extends React.Component<MapStateToProps & MapDispatchToProps & OwnProps, OwnState> {
-    componentWillMount() {
-      this.props.connectToServer()
+    constructor(props) {
+      super(props)
     }
 
-    _renderChat() {
-      const {openingRoom} = this.props
-      if (openingRoom.room && openingRoom.room._id) {
-        return <Chat roomId={openingRoom.room._id}/>
+    componentWillMount() {
+      const {connectToServer} = this.props
+      connectToServer()
+    }
+
+    _renderRooms() {
+      const channelName = this.props.channelName
+      const isLoggedIn = this.props.auth.isLoggedIn
+
+      if (isLoggedIn) {
+        return (
+          <Subscriptions selectedRoomName={channelName}/>
+        )
+      }
+
+      return (
+        <Rooms selectedRoomName={channelName}/>
+      )
+    }
+
+    _renderChannelName(){
+      if(this.props.channelName){
+        return (
+          <div className={classnames('main-channel-name')}>
+            #{this.props.channelName}
+          </div>
+        )
       }
 
       return null
     }
-
+    
     _renderScreen() {
       return (
-        <div className={classnames('screen')}>
+        <div>
           <style>{stylesheet}</style>
-          <aside className={classnames('sidebar')}>
-            <ProfileSummary/>
-            <Rooms/>
-          </aside>
-          <div className={classnames('main')}>
-            <div className={classnames('main-header')}>
-              main-header
-            </div>
-            <div className={classnames('main-content')}>
-              <div className={classnames('chart-content')}>
-                chart content here
-              </div>
-              <div className={classnames('chat-content')}>
+          <div className={classnames('screen')}>
+            <aside className={classnames('sidebar')}>
+              <ProfileSummary/>
+              {
+                this._renderRooms()
+              }
+            </aside>
+            <div className={classnames('main')}>
+              <div className={classnames('main-header')}>
                 {
-                  this._renderChat()
+                  this._renderChannelName()
                 }
+              </div>
+              <div className={classnames('main-content')}>
+                <div className={classnames('chart-content')}>
+                  chart content here
+                </div>
+                <div className={classnames('chat-content')}>
+                  <Chat/>
+                </div>
               </div>
             </div>
           </div>
@@ -95,7 +138,7 @@ export const Index = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
     }
 
     _renderLoading() {
-      //TODO::Render loading 
+      //TODO::Render loading
       return null
     }
 
@@ -115,13 +158,14 @@ export const Index = connect<MapStateToProps, MapDispatchToProps, OwnProps>(
     render() {
       const connection: ConnectionState = this.props.connection
       const isConnectedServer: boolean = connection.isConnected
+      const isStorageLoaded: boolean = this.props.storage.storageLoaded
       const error: string = connection.error
 
       if (error) {
         return this._renderError(error)
       }
 
-      if (isConnectedServer) {
+      if (isConnectedServer && isStorageLoaded) {
         return this._renderScreen()
       }
       else {
